@@ -1,6 +1,6 @@
 <div align="center">
 
-# Trust3R: Evidential Uncertainty for Feed-Forward 3D Reconstruction
+# Trust It or Not: Evidential Uncertainty for Feed-Forward 3D Reconstruction with Trust3R
 
 <p>
   <a href="https://trust3r-z.github.io/"><img alt="Project page" src="https://img.shields.io/badge/Project_Page-Trust3R-0e7c86?style=flat-square"></a>
@@ -267,8 +267,8 @@ optimizer states are written there.
 
 ```bibtex
 @inproceedings{zhu2026trust3r,
-  title     = {Trust3{R}: Unifying Feed-Forward Pointmap Prediction
-               and Evidential Learning for Trust-Aware {3D} Reconstruction},
+  title     = {Trust It or Not: Evidential Uncertainty for
+               Feed-Forward {3D} Reconstruction with Trust3{R}},
   author    = {Zhu, Zihao and Zhao, Wenyuan and Chen, Nuo and
                Tian, Chao and Fan, Zhiwen},
   booktitle = {Proceedings of the 43rd International Conference
