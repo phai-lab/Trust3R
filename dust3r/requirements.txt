@@ -1,0 +1,9 @@
+torch
+torchvision
+roma
+tqdm
+opencv-python
+scipy
+einops
+tensorboard
+huggingface-hub[torch]>=0.22

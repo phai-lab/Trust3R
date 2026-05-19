@@ -1,0 +1,70 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Local environments
+.env
+.venv/
+env/
+venv/
+*.egg-info/
+
+# Native/compiled artifacts
+build/
+dist/
+*.so
+*.o
+*.egg
+
+# Training outputs and checkpoints
+checkpoints/
+weights/
+pretrained/
+output*/
+outputs/
+results/
+analysis_outputs/
+main_table_out/
+paper_figures/
+figures/
+heatmaps_out/
+uq_out/
+uq_runs/
+wandb/
+runs/
+logs/
+*.pth
+*.pt
+*.ckpt
+
+# Large datasets / archives (do NOT ignore `datasets/` — it would catch the
+# in-source `mast3r/datasets/` and `dust3r/dust3r/datasets/` loaders)
+data/
+*.npz
+*.npy
+*.h5
+*.hdf5
+*.tar
+*.tar.gz
+*.tgz
+*.zip
+*.7z
+*tfrecord*
+
+# Local scratch outputs
+tmp/
+viz*/
+vis*/
+uq*/
+debug_*/
+qual_topk*/
+teaser_*/
+
+# OS/editor
+.DS_Store
+.idea/
+.vscode/
