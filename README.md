@@ -266,17 +266,14 @@ optimizer states are written there.
 ## BibTeX
 
 ```bibtex
-@inproceedings{zhu2026trust3r,
-  title     = {Trust It or Not: Evidential Uncertainty for
-               Feed-Forward {3D} Reconstruction with Trust3{R}},
-  author    = {Zhu, Zihao and Zhao, Wenyuan and Chen, Nuo and
-               Tian, Chao and Fan, Zhiwen},
-  booktitle = {Proceedings of the 43rd International Conference
-               on Machine Learning (ICML)},
-  series    = {Proceedings of Machine Learning Research},
-  volume    = {306},
-  year      = {2026},
-  publisher = {PMLR},
+@misc{zhu2026trustnotevidentialuncertainty,
+      title         = {Trust It or Not: Evidential Uncertainty for Feed-Forward 3D Reconstruction with Trust3R},
+      author        = {Zihao Zhu and Wenyuan Zhao and Nuo Chen and Chao Tian and Zhiwen Fan},
+      year          = {2026},
+      eprint        = {2605.19539},
+      archivePrefix = {arXiv},
+      primaryClass  = {cs.CV},
+      url           = {https://arxiv.org/abs/2605.19539},
 }
 ```
 
