@@ -4,6 +4,7 @@
 
 <p>
   <a href="https://trust3r-z.github.io/"><img alt="Project page" src="https://img.shields.io/badge/Project_Page-Trust3R-0e7c86?style=flat-square"></a>
+  <a href="https://arxiv.org/abs/2605.19539"><img alt="arXiv" src="https://img.shields.io/badge/arXiv-2605.19539-b31b1b?style=flat-square&logo=arxiv&logoColor=white"></a>
   <a href="https://drive.google.com/file/d/1iwdfM5WN57wS6ZCsRzy18Tp0169-cc54/view?usp=sharing"><img alt="Paper PDF" src="https://img.shields.io/badge/Paper-PDF-ef6c5b?style=flat-square"></a>
   <a href="#bibtex"><img alt="BibTeX" src="https://img.shields.io/badge/Cite-BibTeX-1c2230?style=flat-square"></a>
   <img alt="License: CC BY-NC-SA 4.0" src="https://img.shields.io/badge/License-CC_BY--NC--SA_4.0-6b7280?style=flat-square">
