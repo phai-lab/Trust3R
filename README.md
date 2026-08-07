@@ -232,21 +232,10 @@ OUT_DIR=eval_out/trust3r \
 bash eval/reproduce_table1_table2.sh
 ```
 
-This writes `table1_uq.csv` (AURC / AUSE / Spearman ρ), `table2_recon.csv`
-(Sim(3)-aligned MAE / RMSE), `table3_nll.csv`, and the Figure 3 risk–coverage and
-sparsification curves into `OUT_DIR`. Read the `ours_niw_epi` rows — the paper
-reports the epistemic readout. One GPU, roughly 2–3 hours for the full run.
-
-| Benchmark | AURC ↓ | AUSE ↓ | ρ ↑ | MAE ↓ | RMSE ↓ |
-| --- | --- | --- | --- | --- | --- |
-| ScanNet++ | 0.1233 | 0.0444 | 0.4930 | 0.1959 | 0.2849 |
-| TUM RGB-D | 0.0481 | 0.0178 | 0.5169 | 0.0873 | 0.1496 |
-| KITTI | 0.9868 | 0.4431 | 0.4596 | 1.6648 | 3.0772 |
-| **Avg** | **0.3861** | **0.1684** | **0.4898** | — | — |
-
-Pair subsets are chosen deterministically (`--subset_seed 0`), so a correct setup
-reproduces these values exactly. [`eval/README.md`](eval/README.md) documents the
-full protocol and the settings that must not be changed.
+Writes `table1_uq.csv`, `table2_recon.csv`, `table3_nll.csv` and the Figure 3
+risk–coverage / sparsification curves into `OUT_DIR`; read the `ours_niw_epi` rows.
+One GPU, roughly 2–3 hours. [`eval/README.md`](eval/README.md) documents the
+protocol and the settings that must not be changed.
 
 ### Benchmarking your own method
 
