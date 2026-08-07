@@ -10,7 +10,7 @@
 #   python infer.py \
 #       --checkpoint checkpoints/trust3r_niw_mast3r_224.pth \
 #       --img1 examples/a.jpg --img2 examples/b.jpg \
-#       --image-size 512 --output-dir infer_out
+#       --image-size 224 --output-dir infer_out
 
 import argparse
 import os
@@ -29,7 +29,7 @@ def parse_args():
     p.add_argument("--checkpoint", required=True, help="Path to a Trust3R checkpoint (.pth)")
     p.add_argument("--img1", required=True, help="Path to the first image")
     p.add_argument("--img2", required=True, help="Path to the second image")
-    p.add_argument("--image-size", type=int, default=512, help="Resize so the long side equals this")
+    p.add_argument("--image-size", type=int, default=224, help="Resize so the long side equals this; the released checkpoints are trained at 224")
     p.add_argument("--output-dir", default="infer_out", help="Where to write preds.pt")
     p.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
     return p.parse_args()
