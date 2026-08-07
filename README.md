@@ -255,7 +255,7 @@ extract whatever uncertainty summary you need.
 
 ```bash
 python infer.py \
-    --checkpoint checkpoints/trust3r_niw.pth \
+    --checkpoint checkpoints/trust3r_niw_mast3r_224.pth \
     --img1 examples/a.jpg \
     --img2 examples/b.jpg \
     --image-size 512 \
