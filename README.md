@@ -66,7 +66,13 @@ Trust3R/
 │   └── losses_evidential.py      # NIG/NIW likelihoods + predictive variance helpers
 ├── dust3r/                       # vendored DUSt3R + CroCo (training/inference deps)
 │   ├── dust3r/training.py        # training loop w/ Trust3R UQ controls
-│   └── dust3r/inference.py       # batch forward + Trust3R uncertainty handling
+│   ├── dust3r/inference.py       # batch forward + Trust3R uncertainty handling
+│   └── datasets_preprocess/      # dataset preprocessing (ScanNet++, TUM, KITTI, ETH3D)
+├── eval/
+│   ├── evaluate_uq.py            # AURC / AUSE / Spearman rho / MAE / RMSE / NLL evaluator
+│   ├── uq_eval_utils.py          # metric + alignment + UQ-readout helpers
+│   ├── reproduce_table1_table2.sh  # one-command reproduction of the main tables
+│   └── README.md                 # evaluation protocol and expected numbers
 ├── scripts/                      # training launchers (env-var driven)
 ├── train.py                      # main training entry point
 ├── infer.py                      # minimal pair inference template
@@ -134,14 +140,121 @@ wget https://download.europe.naverlabs.com/ComputerVision/MASt3R/MASt3R_ViTLarge
      -P checkpoints/
 ```
 
-> Trust3R checkpoints are **not** stored in git. Put your local checkpoints under
-> `checkpoints/` and pass them through `PRETRAINED`, `OUT`, or `OUT_ROOT` (see below).
-
 ### Quick environment sanity check
 
 ```bash
 python -c "from mast3r.model import AsymmetricMASt3R; print('Trust3R env OK')"
 ```
+
+---
+
+## Checkpoints
+
+Trust3R weights are hosted on the Hugging Face Hub, not in git.
+
+| Checkpoint | Head | Backbone | Res. | Size | Paper results |
+|---|---|---|---|---|---|
+| `trust3r_niw_mast3r_224.pth` | **NIW** evidential (full 3×3 covariance) + gated residual | frozen MASt3R ViT-L | 224 | 3.0 GB | Tables 1, 2, 5, 6; Figure 3 |
+| `trust3r_nig_mast3r_224.pth` | **NIG** evidential (diagonal variance) + gated residual | frozen MASt3R ViT-L | 224 | 3.0 GB | Table 6 ablation |
+
+NIW is the main model. NIG is the Table 6 ablation, and is also required to
+reproduce Table 1's Spearman ρ exactly — see
+[`eval/README.md`](eval/README.md#protocol-notes).
+
+```bash
+pip install -U "huggingface_hub[cli]"
+mkdir -p checkpoints
+hf download phai-lab/Trust3R \
+    trust3r_niw_mast3r_224.pth trust3r_nig_mast3r_224.pth \
+    trust3r_niw_mast3r_224.pth.sha256 trust3r_nig_mast3r_224.pth.sha256 \
+    --local-dir checkpoints/
+(cd checkpoints && sha256sum -c *.sha256)
+```
+
+> On `huggingface_hub < 0.34` the CLI is named `huggingface-cli` instead of `hf`.
+
+Load it with the standard MASt3R entry point — the model expression is stored
+inside the checkpoint:
+
+```python
+from mast3r.model import AsymmetricMASt3R
+model = AsymmetricMASt3R.from_pretrained("checkpoints/trust3r_niw_mast3r_224.pth").eval()
+```
+
+Each checkpoint also carries a `trust3r` metadata block recording its provenance,
+training mix, and the exact evaluation protocol behind the published numbers:
+
+```python
+import torch
+print(torch.load("checkpoints/trust3r_niw_mast3r_224.pth", map_location="cpu")["trust3r"])
+```
+
+Checkpoints inherit the MASt3R / DUSt3R license terms — CC BY-NC-SA 4.0,
+non-commercial use only. See [`CHECKPOINTS_NOTICE`](CHECKPOINTS_NOTICE).
+
+---
+
+## Datasets
+
+Trust3R trains on four DUSt3R-preprocessed datasets and evaluates on four
+benchmarks. Download each from its official source, then run the matching script
+in `dust3r/datasets_preprocess/` to produce the preprocessed layout the dataset
+classes expect.
+
+| Dataset | Used for | Official source |
+|---|---|---|
+| ScanNet++ | train + test | https://kaldir.vc.in.tum.de/scannetpp/ |
+| ARKitScenes | train | https://github.com/apple/ARKitScenes |
+| Waymo Open Dataset | train | https://waymo.com/open/ |
+| MegaDepth | train | https://www.cs.cornell.edu/projects/megadepth/ |
+| TUM RGB-D | test | https://cvg.cit.tum.de/data/datasets/rgbd-dataset |
+| KITTI (depth prediction val selection) | test | https://www.cvlibs.net/datasets/kitti/eval_depth.php |
+| ETH3D | test (ablation) | https://www.eth3d.net/datasets |
+
+Each dataset carries its own license and access terms; ScanNet++, Waymo, and
+ETH3D require registration.
+
+---
+
+## Evaluation
+
+Reproduce the paper's Table 1 (uncertainty ranking) and Table 2 (reconstruction
+accuracy) from the released checkpoint:
+
+```bash
+CKPT_NIW=checkpoints/trust3r_niw_mast3r_224.pth \
+CKPT_NIG=checkpoints/trust3r_nig_mast3r_224.pth \
+SCANNETPP_ROOT=/path/to/scannetpp_test_set_processed \
+ETH3D_ROOT=/path/to/eth3d_processed_dust3r \
+KITTI_ROOT=/path/to/kitti_val_selection_processed_dust3r \
+TUM_ROOT=/path/to/tum_processed_v1 \
+OUT_DIR=eval_out/trust3r \
+bash eval/reproduce_table1_table2.sh
+```
+
+This writes `table1_uq.csv` (AURC / AUSE / Spearman ρ), `table2_recon.csv`
+(Sim(3)-aligned MAE / RMSE), `table3_nll.csv`, and the Figure 3 risk–coverage and
+sparsification curves into `OUT_DIR`. Read the `ours_niw_epi` rows — the paper
+reports the epistemic readout. One GPU, roughly 2–3 hours for the full run.
+
+| Benchmark | AURC ↓ | AUSE ↓ | ρ ↑ | MAE ↓ | RMSE ↓ |
+| --- | --- | --- | --- | --- | --- |
+| ScanNet++ | 0.1233 | 0.0444 | 0.4930 | 0.1959 | 0.2849 |
+| TUM RGB-D | 0.0481 | 0.0178 | 0.5169 | 0.0873 | 0.1496 |
+| KITTI | 0.9868 | 0.4431 | 0.4596 | 1.6648 | 3.0772 |
+| **Avg** | **0.3861** | **0.1684** | **0.4898** | — | — |
+
+Pair subsets are chosen deterministically (`--subset_seed 0`), so a correct setup
+reproduces these values exactly. [`eval/README.md`](eval/README.md) documents the
+full protocol and the settings that must not be changed.
+
+### Benchmarking your own method
+
+`eval/evaluate_uq.py` is a general UQ evaluator, not a Trust3R-only script. It
+scores MASt3R confidence, heteroscedastic Gaussian heads, MC Dropout, and Deep
+Ensembles under the same protocol, and adding a new uncertainty head means adding
+one branch to `extract_method_outputs`. `eval/evaluate_baselines.sh` wraps the
+baselines; see [`eval/README.md`](eval/README.md#2-benchmarking-another-method).
 
 ---
 
