@@ -164,7 +164,7 @@ reproduce Table 1's Spearman ρ exactly — see
 ```bash
 pip install -U "huggingface_hub[cli]"
 mkdir -p checkpoints
-hf download phai-lab/Trust3R \
+hf download SingleBicycle/Trust3R \
     trust3r_niw_mast3r_224.pth trust3r_nig_mast3r_224.pth \
     trust3r_niw_mast3r_224.pth.sha256 trust3r_nig_mast3r_224.pth.sha256 \
     --local-dir checkpoints/
