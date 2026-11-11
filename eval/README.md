@@ -95,7 +95,8 @@ Table 5 / Table 6 on ETH3D:
 
 Pair subsets are selected deterministically from `--subset_seed 0` and written to
 `<OUT_DIR>/<BENCH>/subset_pairs_idx.txt`, so a correct setup reproduces these
-values exactly rather than approximately.
+values exactly rather than approximately. Exact agreement needs the RoPE CUDA
+kernels (see the main README); the PyTorch fallback can differ in the fifth decimal.
 
 ---
 
@@ -160,6 +161,11 @@ Details that change the numbers if you deviate from them.
   `reproduce_table1_table2.sh` runs all six methods over all four benchmarks in a
   fixed order even when only the NIW rows are of interest. AURC/AUSE/MAE/RMSE
   reproduce regardless of the method list; ρ only reproduces under the full run.
+
+- **Post-smoothing.** The released checkpoints carry the post-smoothing of the
+  gated residual (App. A.3). It is rebuilt and applied when they are loaded, which
+  is what Tables 1, 2, 5 and 6 use. `--no_gr_post_smooth` evaluates without it:
+  that is the setting of Table 7, whose ★ rows are the `ours_niw_total` rows.
 
 - **Gated-residual settings are read from the model expression**, not from the
   checkpoint's training args. `reproduce_table1_table2.sh` passes the expression

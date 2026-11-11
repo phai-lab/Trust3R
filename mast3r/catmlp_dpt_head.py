@@ -169,6 +169,23 @@ def _init_residual_gated_post_modules(module):
             module.residual_gated.delta_post.to(device=ref_param.device, dtype=ref_param.dtype)
 
 
+def use_two_layer_post_smooth(module):
+    """Post-smoothing of the released checkpoints (App. A.3; paper Tables 1-2): a 3x3 conv on the gate
+    logits and a depthwise-separable conv on the residual, applied directly rather than as residual updates.
+    Turns smoothing on; set `gr_post_smooth = False` on the head afterwards for the setting of Table 7.
+    """
+    gate_channels = int(getattr(module, "gr_gate_channels", 1))
+    post = module.residual_gated
+    post.gate_post = nn.Conv2d(gate_channels, gate_channels, kernel_size=3, padding=1)
+    post.delta_post = nn.Sequential(
+        nn.Conv2d(3, 3, kernel_size=3, padding=1, groups=3),
+        nn.Conv2d(3, 3, kernel_size=1),
+    )
+    post.to(module.gate_mlp.fc1.weight.device)
+    module.gr_post_direct = True
+    module.gr_post_smooth = module.use_gr_post_smooth = True
+
+
 def _configure_residual_gated_modules(
     module,
     residual_gated_mode=None,
@@ -304,13 +321,14 @@ def _apply_residual_gated(module, cat_output, img_shape, out):
             gate_logits = delta.new_full((B, gate_channels, H, W), 20.0)
 
     if bool(getattr(module, "gr_post_smooth", getattr(module, "use_gr_post_smooth", False))):
+        direct = getattr(module, "gr_post_direct", False)  # see use_two_layer_post_smooth
         if gate_mode == "learned":
             gate_post = getattr(getattr(module, "residual_gated", None), "gate_post", None)
             if gate_post is not None:
-                gate_logits = gate_logits + gate_post(gate_logits)
+                gate_logits = gate_post(gate_logits) if direct else gate_logits + gate_post(gate_logits)
         delta_post = getattr(getattr(module, "residual_gated", None), "delta_post", None)
         if delta_post is not None:
-            delta = delta + delta_post(delta)
+            delta = delta_post(delta) if direct else delta + delta_post(delta)
 
     if gate_mode == "fixed_one":
         gate = torch.ones_like(gate_logits)

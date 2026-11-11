@@ -8,7 +8,7 @@ import torch
 import torch.nn.functional as F
 import os
 
-from mast3r.catmlp_dpt_head import mast3r_head_factory
+from mast3r.catmlp_dpt_head import mast3r_head_factory, use_two_layer_post_smooth
 
 import mast3r.utils.path_to_dust3r  # noqa
 from dust3r.model import AsymmetricCroCo3DStereo  # noqa
@@ -49,6 +49,16 @@ class AsymmetricMASt3R(AsymmetricCroCo3DStereo):
             return load_model(pretrained_model_name_or_path, device='cpu')
         else:
             return super(AsymmetricMASt3R, cls).from_pretrained(pretrained_model_name_or_path, **kw)
+
+    def load_state_dict(self, ckpt, **kw):
+        # the released checkpoints were trained with a two-layer post-smoothing: rebuild it so that it loads
+        # shortcut: the modules are replaced on every such load, so `--resume` from one of these checkpoints
+        # leaves the optimizer with the old parameters; rebuild only once if that use case appears
+        if any(k.endswith('residual_gated.delta_post.0.weight') for k in ckpt):
+            for head in (self.downstream_head1, self.downstream_head2):
+                if getattr(head, 'use_residual_gated', False):
+                    use_two_layer_post_smooth(head)
+        return super().load_state_dict(ckpt, **kw)
 
     def set_downstream_head(self, output_mode, head_type, landscape_only, depth_mode, conf_mode, patch_size, img_size, **kw):
         assert img_size[0] % patch_size == 0 and img_size[

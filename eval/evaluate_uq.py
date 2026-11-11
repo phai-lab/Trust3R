@@ -320,6 +320,8 @@ def main():
     ap.set_defaults(sim3_align=True)
     ap.add_argument("--nll_no_sim3", type=int, default=1, choices=[0, 1],
                     help="When 1 (default), NLL ignores Sim3 even if --sim3_align is set.")
+    ap.add_argument("--no_gr_post_smooth", action="store_true",
+                    help="Run the gated residual without its post-smoothing (the setting of paper Table 7).")
 
     # NLL
     ap.add_argument("--do_nll", action="store_true")
@@ -632,6 +634,10 @@ def main():
             else:
                 st = load_state_dict(ckpt, device="cpu")
                 model.load_state_dict(st, strict=False)
+
+            if args.no_gr_post_smooth:
+                for head in (model.downstream_head1, model.downstream_head2):
+                    head.gr_post_smooth = False
 
             model.eval()
 
